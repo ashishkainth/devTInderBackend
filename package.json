@@ -1,0 +1,21 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "tinders for dev",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js "
+  },
+  "keywords": [
+    "nodejs",
+    "javascript",
+    "tinder",
+    "backend"
+  ],
+  "author": "ashish kainth",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
