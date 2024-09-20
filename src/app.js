@@ -6,9 +6,22 @@ app.get("/user", (req, res) => {
   res.send({ firstName: "Ashish", lastName: "Kainth" });
 });
 
-app.post("/user", (req, res) => {
-  res.send({ responseCode: 200, message: "Success" });
-});
+app.post(
+  "/user",
+  (req, res, next) => {
+    console.log("First");
+    // res.send({ responseCode: 200, message: "Success" });
+    next();
+  },
+  (req, res, next) => {
+    console.log("Second");
+    next();
+  },
+  (req, res, next) => {
+    console.log("Thord");
+    res.send("Third");
+  }
+);
 
 // app.use("/hello", (req, res) => {
 //   res.send("Hello Hello From Server");
