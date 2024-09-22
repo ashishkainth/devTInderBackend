@@ -5,6 +5,21 @@ const app = express();
 
 app.use(express.json());
 
+app.delete("/getUserByEmailAndDelete", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    const users = await UserModel.findOneAndDelete({ emailId: userEmail });
+    console.log("users ", users);
+    if (users.length !== 0) {
+      res.send("User Deleted Successfully");
+    } else {
+      res.status(404).send("User Not Found!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!");
+  }
+});
+
 app.get("/getAllUsers", async (req, res) => {
   try {
     const users = await UserModel.find({});
