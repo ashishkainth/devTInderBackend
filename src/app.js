@@ -5,6 +5,28 @@ const app = express();
 
 app.use(express.json());
 
+app.patch("/getUserIdUpdate", async (req, res) => {
+  const userId = req.body.userId;
+  const firstName = req.body.firstName;
+  try {
+    const users = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        firstName: firstName,
+      },
+      { returnDocument: "after" }
+    );
+
+    if (users.length !== 0) {
+      res.send(users);
+    } else {
+      res.status(404).send("User Not Found!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!");
+  }
+});
+
 app.delete("/getUserByEmailAndDelete", async (req, res) => {
   const userEmail = req.body.emailId;
   try {
