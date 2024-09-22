@@ -3,6 +3,38 @@ const connectDB = require("./config/database");
 const UserModel = require("./models/user");
 const app = express();
 
+app.use(express.json());
+
+app.get("/getAllUsers", async (req, res) => {
+  try {
+    const users = await UserModel.find({});
+
+    if (users.length !== 0) {
+      res.send(users);
+    } else {
+      res.status(404).send("No User Found!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!");
+  }
+});
+
+app.get("/getUserByEmail", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    const users = await UserModel.find({ emailId: userEmail });
+
+    console.log("User details ", users);
+    if (users.length !== 0) {
+      res.send(users);
+    } else {
+      res.status(404).send("User Not Found!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!");
+  }
+});
+
 app.post("/register", async (req, res) => {
   console.log("Enter");
   const userData = {
