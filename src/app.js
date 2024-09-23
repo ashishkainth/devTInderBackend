@@ -1,8 +1,9 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const UserModel = require("./models/user");
+const bcrypt = require("bcrypt");
 const app = express();
-
+const validator = require("validator");
 app.use(express.json());
 
 app.patch("/getUserIdUpdate", async (req, res) => {
@@ -86,13 +87,44 @@ app.get("/getUserByEmail", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    console.log(req.body);
+    if (!validator.isEmail(emailId)) {
+      res.send("Invalid email Id");
+    } else if (!validator.isStrongPassword(password)) {
+      res.send("Invalid Password");
+    } else {
+      const users = await UserModel.find({ emailId: emailId });
+      console.log("users ", users);
+      if (users.length !== 0) {
+        const isValidPassword = await bcrypt.compare(
+          password,
+          users[0].password
+        );
+        if (isValidPassword) {
+          res.send("Login Successful!");
+        } else {
+          res.send("Invalid Credentials!");
+        }
+      } else {
+        res.send("Invalid Credentials!");
+      }
+    }
+  } catch (err) {
+    res.send("Something went wrong" + err);
+  }
+});
+
 app.post("/register", async (req, res) => {
-  console.log("Enter");
+  const passwordHash = await bcrypt.hash(req.query.password, 10);
+  console.log("passwordHash ", passwordHash);
   const userData = {
     firstName: req.query.firstName,
     lastName: req.query.lastName,
     emailId: req.query.emailId,
-    password: req.query.password,
+    password: passwordHash,
     age: req.query.age,
     gender: req.query.gender,
     phoneNumber: req.query.phoneNumber,
