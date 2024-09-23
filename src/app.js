@@ -7,15 +7,29 @@ app.use(express.json());
 
 app.patch("/getUserIdUpdate", async (req, res) => {
   const userId = req.body.userId;
-  const firstName = req.body.firstName;
+  const data = req.body;
+
   try {
-    const users = await UserModel.findByIdAndUpdate(
-      userId,
-      {
-        firstName: firstName,
-      },
-      { returnDocument: "after" }
+    const ALLOWED_UPDATES = [
+      "firstName",
+      "lastName",
+      "phoneNumber",
+      "password",
+      "photoURL",
+      "age",
+      "city",
+    ];
+
+    const isUpdatesAllowed = Object.keys(data).every((key) =>
+      ALLOWED_UPDATES.includes(key)
     );
+    if (!isUpdatesAllowed) {
+      throw new Error("Updates not Allowed");
+    }
+    const users = await UserModel.findByIdAndUpdate(userId, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
 
     if (users.length !== 0) {
       res.send(users);
@@ -23,7 +37,7 @@ app.patch("/getUserIdUpdate", async (req, res) => {
       res.status(404).send("User Not Found!");
     }
   } catch (err) {
-    res.status(400).send("Something went wrong!");
+    res.status(400).send("Something went wrong!" + err);
   }
 });
 
@@ -93,7 +107,8 @@ app.post("/register", async (req, res) => {
       await user.save();
       res.send("User Saved Successfully");
     } catch (err) {
-      res.send("Issue in saving data");
+      console.log(err);
+      res.send("Issue in saving data: " + err);
     }
   }
 });
