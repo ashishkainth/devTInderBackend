@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,6 +13,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       require: true,
       unique: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Not valid email format!");
+        }
+      },
     },
     password: {
       type: String,
@@ -29,6 +35,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://w7.pngwing.com/pngs/831/88/png-transparent-user-profile-computer-icons-user-interface-mystique-miscellaneous-user-interface-design-smile-thumbnail.png",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Not valid Image URL!");
+        }
+      },
     },
     gender: {
       type: String,
