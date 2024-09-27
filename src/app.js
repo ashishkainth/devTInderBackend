@@ -1,10 +1,15 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const UserModel = require("./models/user");
+const { userAuth } = require("./middleware/auth");
 const bcrypt = require("bcrypt");
 const app = express();
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+
 app.use(express.json());
+app.use(cookieParser());
 
 app.patch("/getUserIdUpdate", async (req, res) => {
   const userId = req.body.userId;
@@ -87,6 +92,14 @@ app.get("/getUserByEmail", async (req, res) => {
   }
 });
 
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    res.send(req.user);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
@@ -97,13 +110,21 @@ app.post("/login", async (req, res) => {
       res.send("Invalid Password");
     } else {
       const users = await UserModel.find({ emailId: emailId });
-      console.log("users ", users);
+
       if (users.length !== 0) {
         const isValidPassword = await bcrypt.compare(
           password,
           users[0].password
         );
         if (isValidPassword) {
+          const token = await jwt.sign(
+            { _id: users[0]._id },
+            "DEV@Tinder$123",
+            { expiresIn: "1d" }
+          );
+          res.cookie("token", token, {
+            expires: new Date(Date.now() + 8 * 3600000),
+          });
           res.send("Login Successful!");
         } else {
           res.send("Invalid Credentials!");
